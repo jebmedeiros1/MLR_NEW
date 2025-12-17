@@ -1,0 +1,33 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mlr
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  backend:
+    build: ./backend
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - PI_BASE_URL=${PI_BASE_URL}
+      - PI_USERNAME=${PI_USERNAME}
+      - PI_PASSWORD=${PI_PASSWORD}
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+  frontend:
+    build: ./frontend
+    environment:
+      - VITE_API_BASE_URL=http://backend:8000
+    depends_on:
+      - backend
+    ports:
+      - "4173:4173"
+volumes:
+  db_data:
