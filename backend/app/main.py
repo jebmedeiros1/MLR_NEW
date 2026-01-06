@@ -110,7 +110,7 @@ def detect_anomalies(
                         detected_at=datetime.fromisoformat(point["timestamp"]),
                         severity=(point["value"] - threshold) if deviation else 0.0,
                         message="Value exceeded threshold",
-                        metadata={"threshold": threshold},
+                        meta={"threshold": threshold},
                     )
                 )
 
