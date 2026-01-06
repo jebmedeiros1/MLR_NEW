@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_pi_client
-from app.integrations.pi_client import PIWebAPIClient
+from app.integrations.pi_client import PIVNodeClient
 from app.models.anomaly_event import AnomalyEvent
 from app.models.detection_run import DetectionRun
 from app.models.tag import Tag
@@ -44,7 +44,7 @@ def create_tag(payload: TagCreate, db: Session = Depends(get_db)):
 @app.post("/series")
 def fetch_series(
     request: DetectionRunCreate,
-    client: PIWebAPIClient = Depends(get_pi_client),
+    client: PIVNodeClient = Depends(get_pi_client),
 ):
     series = client.get_series(request.tags, request.start_time, request.end_time)
     return {"series": series}
@@ -55,7 +55,7 @@ def fetch_series_query(
     tags: str = Query(..., description="Comma-separated tag list"),
     start_time: Optional[datetime] = None,
     end_time: Optional[datetime] = None,
-    client: PIWebAPIClient = Depends(get_pi_client),
+    client: PIVNodeClient = Depends(get_pi_client),
 ):
     tag_list = [tag.strip() for tag in tags.split(",") if tag.strip()]
     if not tag_list:
@@ -68,7 +68,7 @@ def fetch_series_query(
 def detect_anomalies(
     request: DetectionRunCreate,
     db: Session = Depends(get_db),
-    client: PIWebAPIClient = Depends(get_pi_client),
+    client: PIVNodeClient = Depends(get_pi_client),
 ):
     tags = db.execute(select(Tag).where(Tag.name.in_(request.tags))).scalars().all()
     known_tag_names = {tag.name for tag in tags}

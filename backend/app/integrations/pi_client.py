@@ -6,7 +6,7 @@ import requests
 from app.core.config import get_settings
 
 
-class PIWebAPIClient:
+class PIVNodeClient:
     def __init__(
         self,
         base_url: Optional[str] = None,
@@ -18,7 +18,7 @@ class PIWebAPIClient:
         self.password = password
 
     @classmethod
-    def from_settings(cls) -> "PIWebAPIClient":
+    def from_settings(cls) -> "PIVNodeClient":
         settings = get_settings()
         return cls(
             base_url=settings.pi_base_url,
@@ -39,10 +39,11 @@ class PIWebAPIClient:
 
         series: Dict[str, List[Dict[str, float]]] = {}
         for tag in tags:
-            url = f"{self.base_url}/streams/{tag}/interpolated"
+            url = f"{self.base_url}/vnode/series"
             params = {
-                "startTime": (start_time or datetime.utcnow() - timedelta(hours=1)).isoformat(),
-                "endTime": (end_time or datetime.utcnow()).isoformat(),
+                "tag": tag,
+                "start": (start_time or datetime.utcnow() - timedelta(hours=1)).isoformat(),
+                "end": (end_time or datetime.utcnow()).isoformat(),
                 "interval": "1m",
             }
             response = requests.get(url, params=params, auth=self._build_auth(), timeout=15)
@@ -54,10 +55,16 @@ class PIWebAPIClient:
     @staticmethod
     def parse_series_response(payload: dict) -> List[Dict[str, float]]:
         data = []
-        items = payload.get("Items") or []
+        items = payload.get("items") or payload.get("Items") or payload.get("data") or payload.get("Data") or []
         for item in items:
-            timestamp = item.get("Timestamp")
-            value = item.get("Value")
+            timestamp = (
+                item.get("timestamp")
+                or item.get("Timestamp")
+                or item.get("ts")
+                or item.get("time")
+                or item.get("Time")
+            )
+            value = item.get("value") if "value" in item else item.get("Value") or item.get("val")
             if timestamp is None or value is None:
                 continue
             data.append({"timestamp": timestamp, "value": float(value)})
