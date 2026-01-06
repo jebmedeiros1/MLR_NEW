@@ -2,7 +2,7 @@ from datetime import datetime
 from statistics import mean, stdev
 from typing import List, Optional
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -47,6 +47,20 @@ def fetch_series(
     client: PIWebAPIClient = Depends(get_pi_client),
 ):
     series = client.get_series(request.tags, request.start_time, request.end_time)
+    return {"series": series}
+
+
+@app.get("/series")
+def fetch_series_query(
+    tags: str = Query(..., description="Comma-separated tag list"),
+    start_time: Optional[datetime] = None,
+    end_time: Optional[datetime] = None,
+    client: PIWebAPIClient = Depends(get_pi_client),
+):
+    tag_list = [tag.strip() for tag in tags.split(",") if tag.strip()]
+    if not tag_list:
+        raise HTTPException(status_code=400, detail="At least one tag must be provided")
+    series = client.get_series(tag_list, start_time, end_time)
     return {"series": series}
 
 

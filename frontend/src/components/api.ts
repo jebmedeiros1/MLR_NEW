@@ -17,7 +17,11 @@ export async function createTag(name: string, description?: string) {
 }
 
 export async function fetchSeries(tags: string[]) {
-  const { data } = await api.post('/series', { tags, model_name: 'viewer' })
+  const { data } = await api.get('/series', {
+    params: {
+      tags: tags.join(','),
+    },
+  })
   return data.series
 }
 
