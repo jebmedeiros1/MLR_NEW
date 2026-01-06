@@ -39,7 +39,7 @@ def upgrade() -> None:
         sa.Column('detected_at', sa.DateTime(), nullable=False),
         sa.Column('severity', sa.Float(), nullable=False),
         sa.Column('message', sa.String(length=1024), nullable=True),
-        sa.Column('metadata', sa.JSON(), nullable=True),
+        sa.Column('meta', sa.JSON(), nullable=True),
         sa.ForeignKeyConstraint(['run_id'], ['detection_runs.id'], ),
         sa.ForeignKeyConstraint(['tag_id'], ['tags.id'], ),
         sa.PrimaryKeyConstraint('id')

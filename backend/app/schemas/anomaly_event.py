@@ -10,7 +10,7 @@ class AnomalyEventBase(BaseModel):
     detected_at: Optional[datetime] = None
     severity: float
     message: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = None
 
 
 class AnomalyEventCreate(AnomalyEventBase):

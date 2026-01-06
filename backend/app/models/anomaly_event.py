@@ -15,7 +15,7 @@ class AnomalyEvent(Base):
     detected_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     severity = Column(Float, nullable=False)
     message = Column(String(1024), nullable=True)
-    metadata = Column(JSON, nullable=True)
+    meta = Column(JSON, nullable=True)
 
     tag = relationship("Tag", back_populates="anomalies")
     run = relationship("DetectionRun", back_populates="anomalies")
